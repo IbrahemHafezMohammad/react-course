@@ -1,13 +1,31 @@
 import TextInput from "./TextInput";
 import CustomButton from "./CustomButton";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useSeekerRegisterMutation } from "../slices/usersApiSlice";
+import { setCredentials } from "../slices/authSlice";
 import React, { useState } from "react";
-import axios from 'axios';
+import axios from "axios";
 import { constants } from "../context/API/constants";
 
 function SeekerRegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [errMsg, setErrMsg] = useState("");
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+//   const [registerApi, { isLoading, error }] = useSeekerRegisterMutation();
+
+  const { userInfo, userType } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (userInfo) {
+      navigate("/");
+    }
+  }, [navigate, userInfo]);
 
   const {
     register,
@@ -20,19 +38,30 @@ function SeekerRegisterForm() {
   });
 
   const onSubmit = async (data) => {
-    if(data.birthday) {
-        data.birthday = `${data.birthday} 00:00:00`;
+    if (data.birthday) {
+      data.birthday = `${data.birthday} 00:00:00`;
     }
-    
+
     try {
-      const response = await axios.post(`${constants.BASE_URL}/seeker/register`, data);
-      console.log('response : ', response)
-      // Handle successful response
+      //   const response = await registerApi(data).unwrap();
+      //   dispatch(setCredentials({ userInfo: response, userType: "seeker" }));.
+      const response = await axios.post(
+        `${constants.BASE_URL}/seeker/register`,
+        data
+      );
+      console.log("response : ", response.data);
+      dispatch(setCredentials({ userInfo: response.data, userType: "seeker" }));
+      navigate("/verify-email");
     } catch (error) {
-      if (error.response && error.response.status === 422) {
+      console.log("error : ", error);
+
+      if (error?.response?.status === 422) {
         const validationErrors = error.response.data.message;
         Object.keys(validationErrors).forEach((field) => {
-          setError(field, { type: 'manual', message: validationErrors[field][0] });
+          setError(field, {
+            type: "manual",
+            message: validationErrors[field][0],
+          });
         });
       } else {
         setErrMsg("An error occurred. Please try again.");
@@ -42,7 +71,10 @@ function SeekerRegisterForm() {
 
   return (
     <>
-      <form className="w-full flex flex-col gap-4 mt-4" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="w-full flex flex-col gap-4 mt-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <TextInput
           name="user_name"
           label="Username"
@@ -52,7 +84,8 @@ function SeekerRegisterForm() {
             required: "Username is required!",
             pattern: {
               value: /^(?:[a-z]|[0-9]){8,12}$/,
-              message: "Username must be lowercase or numbers, 8-12 characters long",
+              message:
+                "Username must be lowercase or numbers, 8-12 characters long",
             },
           })}
           error={errors.user_name ? errors.user_name.message : ""}
@@ -68,7 +101,8 @@ function SeekerRegisterForm() {
               required: "Password is required!",
               pattern: {
                 value: /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{6,16}$/,
-                message: "Password must be 6-16 characters long and include letters, numbers, and special characters",
+                message:
+                  "Password must be 6-16 characters long and include letters, numbers, and special characters",
               },
             })}
             error={errors.password ? errors.password.message : ""}
@@ -95,7 +129,9 @@ function SeekerRegisterForm() {
                 return password === value || "Passwords do not match";
               },
             })}
-            error={errors.confirm_password ? errors.confirm_password.message : ""}
+            error={
+              errors.confirm_password ? errors.confirm_password.message : ""
+            }
           />
         </div>
 
@@ -119,7 +155,8 @@ function SeekerRegisterForm() {
             required: "Phone number is required!",
             pattern: {
               value: /^[\+][0-9]{11,14}$/,
-              message: "Phone number must be in the format +12345678901 and 11-14 digits long",
+              message:
+                "Phone number must be in the format +12345678901 and 11-14 digits long",
             },
           })}
           error={errors.phone ? errors.phone.message : ""}
@@ -137,7 +174,9 @@ function SeekerRegisterForm() {
         />
 
         <div className="flex flex-col gap-1">
-          <label className="block text-sm font-medium text-gray-700">Gender</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Gender
+          </label>
           <select
             className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             {...register("gender")}
@@ -174,7 +213,6 @@ function SeekerRegisterForm() {
           containerStyles="mt-4 inline-flex justify-center rounded-md bg-blue-600 px-8 py-2 text-sm font-medium text-white outline-none hover:bg-blue-800"
           title="Create Account"
         />
-        
       </form>
     </>
   );
