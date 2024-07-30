@@ -5,6 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import React from "react";
+import { useSelector } from "react-redux";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import JobsPage from "./pages/JobsPage";
@@ -17,6 +18,9 @@ import VerifyEmailPage from "./pages/VerifyEmailPage";
 import JobPage, { jobLoader } from "./pages/JobPage";
 
 const App = () => {
+
+  const { userInfo, userType } = useSelector((state) => state.auth);
+
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<MainLayout />}>
