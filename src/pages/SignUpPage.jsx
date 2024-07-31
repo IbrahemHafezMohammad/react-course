@@ -10,7 +10,6 @@ function SignUpPage() {
   const location = useLocation();
   const { isLogin } = location.state || {}
 
-  console.log('isLogin', isLogin);
   const [tab, setTab] = useState("seeker-tab");
 
   const renderForm = () => {

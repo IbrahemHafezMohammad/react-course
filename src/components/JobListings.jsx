@@ -25,8 +25,6 @@ const JobListings = ({ isHome = false }) => {
         fetchJobs();
     }, [])
 
-    // console.log('jobs  ', jobs)
-
     return (
         <>
             <section className="bg-blue-50 px-4 py-10">

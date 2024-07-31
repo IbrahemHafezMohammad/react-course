@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { userInfo, userType } = useSelector((state) => state.auth);
-  console.log('nav userInfo', userInfo)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -49,10 +48,10 @@ const Navbar = () => {
               {userInfo ? (
                 <>
                   <NavLink
-                    to="/profile"
+                    to="/dashboard"
                     className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md ml-2 hover:bg-white hover:text-indigo-700"
                   >
-                    Profile
+                    Dashboard
                   </NavLink>
                   <button
                     onClick={handleLogout}
