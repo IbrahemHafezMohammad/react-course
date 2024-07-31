@@ -9,15 +9,19 @@ import { setCredentials } from "../slices/authSlice";
 import React, { useState } from "react";
 import axios from "axios";
 import { constants } from "../context/API/constants";
+import { ClipLoader } from "react-spinners";
 
 function SeekerRegisterForm() {
+
   const [showPassword, setShowPassword] = useState(false);
   const [errMsg, setErrMsg] = useState("");
+
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-//   const [registerApi, { isLoading, error }] = useSeekerRegisterMutation();
+  //   const [registerApi, { isLoading, error }] = useSeekerRegisterMutation();
 
   const { userInfo, userType } = useSelector((state) => state.auth);
 
@@ -25,7 +29,7 @@ function SeekerRegisterForm() {
     if (userInfo) {
       navigate("/");
     }
-  }, [navigate, userInfo]);
+  }, []);
 
   const {
     register,
@@ -38,6 +42,7 @@ function SeekerRegisterForm() {
   });
 
   const onSubmit = async (data) => {
+    setLoading(true);
     if (data.birthday) {
       data.birthday = `${data.birthday} 00:00:00`;
     }
@@ -49,10 +54,11 @@ function SeekerRegisterForm() {
         `${constants.BASE_URL}/seeker/register`,
         data
       );
-      console.log("response : ", response.data);
       dispatch(setCredentials({ userInfo: response.data, userType: "seeker" }));
       navigate("/verify-email");
     } catch (error) {
+      setLoading(false);
+
       console.log("error : ", error);
 
       if (error?.response?.status === 422) {
@@ -208,11 +214,18 @@ function SeekerRegisterForm() {
           </span>
         )}
 
-        <CustomButton
-          type="submit"
-          containerStyles="mt-4 inline-flex justify-center rounded-md bg-blue-600 px-8 py-2 text-sm font-medium text-white outline-none hover:bg-blue-800"
-          title="Create Account"
-        />
+        {loading ? (
+          <div className="flex justify-center">
+            <ClipLoader color="#4A90E2" size={35} />
+          </div>
+        ) : (
+          <CustomButton
+            type="submit"
+            containerStyles="mt-4 inline-flex justify-center rounded-md bg-blue-600 px-8 py-2 text-sm font-medium text-white outline-none hover:bg-blue-800"
+            title="Create Account"
+          />
+        )}
+
       </form>
     </>
   );

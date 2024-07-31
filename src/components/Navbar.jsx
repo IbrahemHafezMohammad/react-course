@@ -1,12 +1,13 @@
 import React from "react";
 import { Logo } from "../assets";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removeCredentials } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { userInfo, userType } = useSelector((state) => state.auth);
+  console.log('nav userInfo', userInfo)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -63,13 +64,16 @@ const Navbar = () => {
               ) : (
                 <>
                   <NavLink
+                    // to={{ pathname: "/sign-up", state: { isLogin: false } }}
                     to="/sign-up"
+                    state={{ isLogin: false }}
                     className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md ml-2 hover:bg-white hover:text-indigo-700"
                   >
                     Sign Up
                   </NavLink>
                   <NavLink
-                    to="/login"
+                    to="/sign-up"
+                    state={{ isLogin: true }}
                     className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md ml-2 hover:bg-white hover:text-indigo-700"
                   >
                     Login
