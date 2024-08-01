@@ -1,42 +1,62 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { Card, Row, Col, Typography, Tag } from 'antd';
+
+const { Title, Text } = Typography;
 
 function DashboardPage() {
   const navigate = useNavigate();
   const { userInfo, userType, emailVerified } = useSelector((state) => state.auth);
 
   return (
-    <div className="flex min-h-screen bg-blue-100 p-6">
-      <div className="w-1/3 p-8 bg-white rounded-lg shadow-lg" style={{ height: '90vh' }}>
-        <h2 className="text-xl font-semibold mb-4 text-center">User Information</h2>
-        <div className="space-y-6 text-sm leading-relaxed">
-          <p><strong>Name:</strong> {userInfo.name || <span className="text-gray-500">No name provided</span>}</p>
-          
-          <p>
-            <strong>Email:</strong> {userInfo.email || <span className="text-gray-500">No email provided</span>}
-            {emailVerified === 'yes' ? (
-              <span className="inline-block bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full ml-2">Verified</span>
-            ) : (
-              <>
-                <a href="/verify-email" className="text-blue-500 hover:underline ml-2">Please verify email</a>
-                <p className="text-xs text-red-500 mt-1">Please verify your email to use our system features</p>
-              </>
-            )}
-          </p>
+    <div className="min-h-screen bg-blue-100 p-6">
+      <Row justify="start">
+        <Col xs={24} md={12} lg={8}>
+          <Card
+            title="User Information"
+            bordered={false}
+            style={{ width: '100%', height: '90vh' }}
+          >
+            <div className="space-y-6">
+              <Title level={5}>Name:</Title>
+              <Text>{userInfo.name || <Text type="secondary">No name provided</Text>}</Text>
 
-          <p><strong>Phone:</strong> {userInfo.phone || <span className="text-gray-500">No phone number provided</span>}</p>
-          <p><strong>Birthday:</strong> {userInfo.birthday || <span className="text-gray-500">No birthday provided</span>}</p>
-          <p><strong>Gender:</strong> {userInfo.gender_name || <span className="text-gray-500">No gender information provided</span>}</p>
-          
-          {userType !== 'employer' && (
-            <>
-              <p><strong>Headline:</strong> {userInfo.headline || <span className="text-gray-500">No headline provided</span>}</p>
-              <p><strong>Description:</strong> {userInfo.desc || <span className="text-gray-500">No description provided</span>}</p>
-            </>
-          )}
-        </div>
-      </div>
+              <Title level={5}>Email:</Title>
+              <Text>{userInfo.email || <Text type="secondary">No email provided</Text>}</Text>
+              {emailVerified === 'yes' ? (
+                <Tag color="green" style={{ marginLeft: '8px' }}>Verified</Tag>
+              ) : (
+                <>
+                  <a href="/verify-email" style={{ marginLeft: '8px', color: '#1890ff' }}>Please verify email</a>
+                  <Text type="danger" style={{ display: 'block', marginTop: '4px' }}>
+                    Please verify your email to use our system features
+                  </Text>
+                </>
+              )}
+
+              <Title level={5}>Phone:</Title>
+              <Text>{userInfo.phone || <Text type="secondary">No phone number provided</Text>}</Text>
+
+              <Title level={5}>Birthday:</Title>
+              <Text>{userInfo.birthday || <Text type="secondary">No birthday provided</Text>}</Text>
+
+              <Title level={5}>Gender:</Title>
+              <Text>{userInfo.gender_name || <Text type="secondary">No gender information provided</Text>}</Text>
+
+              {userType !== 'employer' && (
+                <>
+                  <Title level={5}>Headline:</Title>
+                  <Text>{userInfo.headline || <Text type="secondary">No headline provided</Text>}</Text>
+
+                  <Title level={5}>Description:</Title>
+                  <Text>{userInfo.desc || <Text type="secondary">No description provided</Text>}</Text>
+                </>
+              )}
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

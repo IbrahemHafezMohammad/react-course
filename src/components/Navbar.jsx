@@ -1,18 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Logo } from "../assets";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { removeCredentials } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import { MenuOutlined, CloseOutlined } from '@ant-design/icons';
 
 const Navbar = () => {
   const { userInfo, userType, emailVerified } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(removeCredentials());
     navigate("/");
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const linkClass = ({ isActive }) =>
@@ -24,32 +30,40 @@ const Navbar = () => {
     <nav className="bg-indigo-700 border-b border-indigo-500 z-50 relative">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <div className="flex flex-1 items-center justify-center md:items-stretch md:justify-start">
-            <NavLink className="flex flex-shrink-0 items-center mr-4" to="/">
+          <div className="flex items-center justify-between w-full md:w-auto">
+            <NavLink className="flex flex-shrink-0 items-center" to="/">
               <img className="h-10 w-auto" src={Logo} alt="React Jobs" />
               <span className="hidden md:block text-white text-2xl font-bold ml-2">
                 React Jobs
               </span>
             </NavLink>
-            <div className="md:ml-auto">
-              <div className="flex space-x-2">
-                <NavLink to="/" className={linkClass}>
-                  Home
-                </NavLink>
-                <NavLink to="/jobs" className={linkClass}>
-                  Jobs
-                </NavLink>
-                <NavLink to="/about" className={linkClass}>
-                  About Us
-                </NavLink>
-                {userInfo && userType === 'employer' && emailVerified === 'yes' &&
-                  <NavLink to="/post-job" className={linkClass}>
-                    Add Job
-                  </NavLink>
-                }
-              </div>
+            <div className="md:hidden">
+              <button
+                onClick={toggleMobileMenu}
+                className="text-white focus:outline-none"
+              >
+                {isMobileMenuOpen ? <CloseOutlined className="text-xl" /> : <MenuOutlined className="text-xl" />}
+              </button>
             </div>
-            <div className="md:ml-auto flex items-center">
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex md:items-center md:space-x-2">
+            <NavLink to="/" className={linkClass}>
+              Home
+            </NavLink>
+            <NavLink to="/jobs" className={linkClass}>
+              Jobs
+            </NavLink>
+            <NavLink to="/about" className={linkClass}>
+              About Us
+            </NavLink>
+            {userInfo && userType === 'employer' && emailVerified === 'yes' && (
+              <NavLink to="/post-job" className={linkClass}>
+                Add Job
+              </NavLink>
+            )}
+            <div className="flex items-center">
               {userInfo ? (
                 <>
                   <NavLink
@@ -68,7 +82,6 @@ const Navbar = () => {
               ) : (
                 <>
                   <NavLink
-                    // to={{ pathname: "/sign-up", state: { isLogin: false } }}
                     to="/sign-up"
                     state={{ isLogin: false }}
                     className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md ml-2 hover:bg-white hover:text-indigo-700"
@@ -88,6 +101,64 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-indigo-700 border-t border-indigo-500 pb-4">
+          <div className="px-2 pt-2 flex flex-col space-y-2">
+            <NavLink to="/" className={linkClass} onClick={toggleMobileMenu}>
+              Home
+            </NavLink>
+            <NavLink to="/jobs" className={linkClass} onClick={toggleMobileMenu}>
+              Jobs
+            </NavLink>
+            <NavLink to="/about" className={linkClass} onClick={toggleMobileMenu}>
+              About Us
+            </NavLink>
+            {userInfo && userType === 'employer' && emailVerified === 'yes' && (
+              <NavLink to="/post-job" className={linkClass} onClick={toggleMobileMenu}>
+                Add Job
+              </NavLink>
+            )}
+            {userInfo ? (
+              <>
+                <NavLink
+                  to="/dashboard"
+                  className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md block hover:bg-white hover:text-indigo-700"
+                  onClick={toggleMobileMenu}
+                >
+                  Dashboard
+                </NavLink>
+                <button
+                  onClick={() => { handleLogout(); toggleMobileMenu(); }}
+                  className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md block hover:bg-white hover:text-indigo-700"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/sign-up"
+                  state={{ isLogin: false }}
+                  className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md block hover:bg-white hover:text-indigo-700"
+                  onClick={toggleMobileMenu}
+                >
+                  Sign Up
+                </NavLink>
+                <NavLink
+                  to="/sign-up"
+                  state={{ isLogin: true }}
+                  className="bg-indigo-700 text-white border border-white px-4 py-2 rounded-md block hover:bg-white hover:text-indigo-700"
+                  onClick={toggleMobileMenu}
+                >
+                  Login
+                </NavLink>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
