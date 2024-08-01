@@ -20,7 +20,6 @@ function PrivateSeekerRoute() {
 function PrivateEmployerRoute() {
     const { userInfo, userType, emailVerified } = useSelector((state) => state.auth);
 
-    console.log('result', userInfo && userType === 'employer' && emailVerified === 'yes')
     if (userInfo && userType === 'employer' && emailVerified === 'yes') {
         return <Outlet />
     } else {

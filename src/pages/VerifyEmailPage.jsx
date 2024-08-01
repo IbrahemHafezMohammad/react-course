@@ -14,7 +14,6 @@ const VerifyEmailPage = () => {
   const [errMsg, setErrMsg] = useState("");
   const { userInfo, emailVerified } = useSelector((state) => state.auth);
 
-  console.log('emailVerified: ', emailVerified)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

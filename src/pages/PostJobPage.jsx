@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Select, Upload, message } from 'antd';
 import { useForm } from 'react-hook-form';
+import { useSelector } from "react-redux";
 import axios from 'axios';
 import { constants } from '../context/API/constants';
 
@@ -12,15 +13,24 @@ function PostJobPage() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageLink, setImageLink] = useState(null);
   const [form] = Form.useForm();
+  const { userInfo, userType } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Fetch skills for dropdown
     const fetchSkills = async () => {
       try {
-        const response = await axios.get(`${constants.BASE_URL}/skills`);
-        console.log(response);
+        const response = await axios.get(
+          `${constants.BASE_URL}/skills/dropdown`,
+          {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            }
+          },
+        );
         setSkills(response.data.length > 0 ? response.data : []); // Handle empty skills array
       } catch (error) {
+        console.log('error ', error);
+
         setSkills([]); // Set empty array if fetching fails
       }
     };
@@ -33,9 +43,10 @@ function PostJobPage() {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('upload/file', formData, {
+      const response = await axios.post(`${constants.BASE_URL}/upload/file`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${userInfo.token}`,
         }
       });
       setImageLink(response.data.link);

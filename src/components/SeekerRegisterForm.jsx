@@ -59,8 +59,6 @@ function SeekerRegisterForm() {
     } catch (error) {
       setLoading(false);
 
-      console.log("error : ", error);
-
       if (error?.response?.status === 422) {
         const validationErrors = error.response.data.message;
         Object.keys(validationErrors).forEach((field) => {
