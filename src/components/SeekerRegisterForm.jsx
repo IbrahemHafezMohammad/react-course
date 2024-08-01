@@ -54,7 +54,7 @@ function SeekerRegisterForm() {
         `${constants.BASE_URL}/seeker/register`,
         data
       );
-      dispatch(setCredentials({ userInfo: response.data, userType: "seeker" }));
+      dispatch(setCredentials({ userInfo: response.data, userType: "seeker", emailVerified: 'no' }));
       navigate("/verify-email");
     } catch (error) {
       setLoading(false);

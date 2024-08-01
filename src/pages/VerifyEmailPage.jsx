@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { constants } from "../context/API/constants";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { changeVerifyEmailStatus } from "../slices/authSlice";
 
 const VerifyEmailPage = () => {
   const [seconds, setSeconds] = useState(60);
   const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
   const [errMsg, setErrMsg] = useState("");
-  const { userInfo } = useSelector((state) => state.auth);
+  const { userInfo, emailVerified } = useSelector((state) => state.auth);
 
+  console.log('emailVerified: ', emailVerified)
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
-  const [resendloading, setResendLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -41,10 +45,10 @@ const VerifyEmailPage = () => {
       );
       setSeconds(60);
       setIsActive(false);
-      setResendloading(false);
+      setResendLoading(false);
       toast.success("Please Check Your Email!");
     } catch (error) {
-      setResendloading(false);
+      setResendLoading(false);
       toast.error("Email Resend Failed!");
       console.error("Failed to resend verification email", error);
     }
@@ -68,7 +72,8 @@ const VerifyEmailPage = () => {
           },
         }
       );
-      toast.success("Login successful!");
+      dispatch(changeVerifyEmailStatus({ emailVerified: 'yes' }));
+      toast.success("Verify Successful!");
       navigate("/");
     } catch (error) {
       setLoading(false);
@@ -83,6 +88,7 @@ const VerifyEmailPage = () => {
         if (statusCode === 400) {
           switch (message) {
             case "EMAIL_ALREADY_VERIFIED":
+              dispatch(changeVerifyEmailStatus({ emailVerified: 'yes' }));
               toast.error("Email Already Verified.");
               break;
             case "INVALID_VERIFICATION_TOKEN":
@@ -127,7 +133,7 @@ const VerifyEmailPage = () => {
           </button>
         )}
 
-        {resendloading ? (
+        {resendLoading ? (
           <div className="flex justify-center">
             <ClipLoader color="#4A90E2" size={35} />
           </div>

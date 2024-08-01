@@ -6,7 +6,7 @@ import { removeCredentials } from "../slices/authSlice";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
-  const { userInfo, userType } = useSelector((state) => state.auth);
+  const { userInfo, userType, emailVerified } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -39,9 +39,14 @@ const Navbar = () => {
                 <NavLink to="/jobs" className={linkClass}>
                   Jobs
                 </NavLink>
-                <NavLink to="/add-job" className={linkClass}>
-                  Add Job
+                <NavLink to="/about" className={linkClass}>
+                  About Us
                 </NavLink>
+                {userInfo && userType === 'employer' && emailVerified === 'yes' &&
+                  <NavLink to="/post-job" className={linkClass}>
+                    Add Job
+                  </NavLink>
+                }
               </div>
             </div>
             <div className="md:ml-auto flex items-center">

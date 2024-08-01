@@ -4,19 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function DashboardPage() {
   const navigate = useNavigate();
-  const { userInfo } = useSelector((state) => state.auth);
-
-  // Redirect to home if no user is logged in
-  useEffect(() => {
-    if (!userInfo) {
-      navigate('/');
-    }
-  }, [userInfo, navigate]);
-
-  if (!userInfo) {
-    // Optionally, render null or a loading spinner while redirecting
-    return null;
-  }
+  const { userInfo, userType, emailVerified } = useSelector((state) => state.auth);
 
   return (
     <div className="flex min-h-screen bg-blue-100 p-6">
@@ -27,7 +15,7 @@ function DashboardPage() {
           
           <p>
             <strong>Email:</strong> {userInfo.email || <span className="text-gray-500">No email provided</span>}
-            {userInfo.email_verified_at ? (
+            {emailVerified === 'yes' ? (
               <span className="inline-block bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full ml-2">Verified</span>
             ) : (
               <>
@@ -40,8 +28,13 @@ function DashboardPage() {
           <p><strong>Phone:</strong> {userInfo.phone || <span className="text-gray-500">No phone number provided</span>}</p>
           <p><strong>Birthday:</strong> {userInfo.birthday || <span className="text-gray-500">No birthday provided</span>}</p>
           <p><strong>Gender:</strong> {userInfo.gender_name || <span className="text-gray-500">No gender information provided</span>}</p>
-          <p><strong>Headline:</strong> {userInfo.headline || <span className="text-gray-500">No headline provided</span>}</p>
-          <p><strong>Description:</strong> {userInfo.desc || <span className="text-gray-500">No description provided</span>}</p>
+          
+          {userType !== 'employer' && (
+            <>
+              <p><strong>Headline:</strong> {userInfo.headline || <span className="text-gray-500">No headline provided</span>}</p>
+              <p><strong>Description:</strong> {userInfo.desc || <span className="text-gray-500">No description provided</span>}</p>
+            </>
+          )}
         </div>
       </div>
     </div>

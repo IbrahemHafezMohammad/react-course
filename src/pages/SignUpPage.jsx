@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Office } from "../assets";
 import { useLocation } from "react-router-dom";
 import SeekerRegisterForm from "../components/SeekerRegisterForm";
-import EmployerRegisterForm from "./EmployerRegisterForm";
+import EmployerRegisterForm from "../components/EmployerRegisterForm";
 import LoginForm from "../components/LoginForm";
 
 function SignUpPage() {

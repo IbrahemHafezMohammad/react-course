@@ -47,11 +47,13 @@ function LoginForm({ tap }) {
         try {
             const response = await axios.post(apiUrl, data);
 
+            const emailVerified = response.data?.email_verified_at ? 'yes' : 'no'
             // If successful, set credentials and show success toast
             dispatch(
                 setCredentials({
                     userInfo: response.data,
                     userType: tap === "seeker-tab" ? "seeker" : "employer",
+                    emailVerified: emailVerified
                 })
             );
             toast.success("Login successful!");
