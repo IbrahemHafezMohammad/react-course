@@ -12,6 +12,7 @@ function PostJobPage() {
   const [skills, setSkills] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageLink, setImageLink] = useState(null);
+  const [fileList, setFileList] = useState([]); // Manage file list for the upload
   const [form] = Form.useForm();
   const { userInfo, userType } = useSelector((state) => state.auth);
 
@@ -30,7 +31,6 @@ function PostJobPage() {
         setSkills(response.data.length > 0 ? response.data : []); // Handle empty skills array
       } catch (error) {
         console.log('error ', error);
-
         setSkills([]); // Set empty array if fetching fails
       }
     };
@@ -51,11 +51,31 @@ function PostJobPage() {
       });
       setImageLink(response.data.link);
       setUploadedImage(URL.createObjectURL(file));
-      return false;
+
+      // Update file list with the latest file
+      setFileList([file]);
+
+      message.success("Image uploaded successfully");
     } catch (error) {
       message.error("Failed to upload image");
-      return false;
     }
+  };
+
+  const beforeUpload = (file) => {
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      message.error("You can only upload image files!");
+      return Upload.LIST_IGNORE; // Prevent non-image files from being uploaded
+    }
+    onImageUpload(file); // Proceed with the upload if it's an image
+    return false;
+  };
+
+  const handleRemove = () => {
+    setFileList([]);
+    setUploadedImage(null);
+    setImageLink(null);
+    message.success("Image removed successfully");
   };
 
   const onSubmit = async (data) => {
@@ -120,8 +140,10 @@ function PostJobPage() {
         <Upload
           name="image"
           listType="picture"
-          beforeUpload={onImageUpload}
-          accept="image/*"
+          beforeUpload={beforeUpload}
+          onRemove={handleRemove} // Handle removal of images
+          fileList={fileList} // Ensure only one file is shown in the list
+          accept="image/*" // Restrict to image files only
         >
           <Button>Click to upload</Button>
         </Upload>
