@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Select, Upload, message } from 'antd';
-import { useForm } from 'react-hook-form';
 import { useSelector } from "react-redux";
 import axios from 'axios';
 import { constants } from '../context/API/constants';
@@ -8,7 +7,6 @@ import { constants } from '../context/API/constants';
 const { Option } = Select;
 
 function PostJobPage() {
-  const { handleSubmit, setValue, formState: { errors } } = useForm();
   const [skills, setSkills] = useState([]);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageLink, setImageLink] = useState(null);
@@ -78,15 +76,20 @@ function PostJobPage() {
     message.success("Image removed successfully");
   };
 
-  const onSubmit = async (data) => {
+  const onFinish = async (data) => {
+    console.log('data: ', data)
     const jobData = {
       ...data,
       image: imageLink, // Set the image link obtained from the upload
-      skills: data.skills.map(skill => skill.value) // Convert skills to an array of IDs
+      skills: data.skills.map(skillId => parseInt(skillId)), // Convert skills to an array of IDs
     };
 
     try {
-      const response = await axios.post('employer/jobs/post', jobData);
+      const response = await axios.post(`${constants.BASE_URL}/employer/jobs/post`, jobData, {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        }
+      });
       message.success("Job posted successfully");
     } catch (error) {
       message.error("Failed to post job");
@@ -96,7 +99,7 @@ function PostJobPage() {
   return (
     <Form
       form={form}
-      onFinish={handleSubmit(onSubmit)}
+      onFinish={onFinish}
       layout="vertical"
       className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg"
     >
