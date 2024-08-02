@@ -43,18 +43,16 @@ function SeekerRegisterForm() {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    if (data.birthday) {
-      data.birthday = `${data.birthday} 00:00:00`;
-    }
+    // if (data.birthday) {
+    //   data.birthday = `${data.birthday} 00:00:00`;
+    // }
 
     try {
-      //   const response = await registerApi(data).unwrap();
-      //   dispatch(setCredentials({ userInfo: response, userType: "seeker" }));.
       const response = await axios.post(
         `${constants.BASE_URL}/seeker/register`,
         data
       );
-      dispatch(setCredentials({ userInfo: response.data, userType: "seeker", emailVerified: 'no' }));
+      dispatch(setCredentials({ userInfo: response.data, userType: "seeker", emailVerified: 'no', token: response.data?.token }));
       navigate("/verify-email");
     } catch (error) {
       setLoading(false);

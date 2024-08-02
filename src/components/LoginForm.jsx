@@ -53,7 +53,8 @@ function LoginForm({ tap }) {
                 setCredentials({
                     userInfo: response.data,
                     userType: tap === "seeker-tab" ? "seeker" : "employer",
-                    emailVerified: emailVerified
+                    emailVerified: emailVerified,
+                    token: response.data?.token
                 })
             );
             toast.success("Login successful!");

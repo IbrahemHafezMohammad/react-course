@@ -10,9 +10,9 @@ import { changeVerifyEmailStatus } from "../slices/authSlice";
 const VerifyEmailPage = () => {
   const [seconds, setSeconds] = useState(60);
   const [isActive, setIsActive] = useState(false);
-  const [token, setToken] = useState("");
+  const [emailToken, setEmailToken] = useState("");
   const [errMsg, setErrMsg] = useState("");
-  const { userInfo, emailVerified } = useSelector((state) => state.auth);
+  const { userInfo, emailVerified, token } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const VerifyEmailPage = () => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${userInfo.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -56,7 +56,7 @@ const VerifyEmailPage = () => {
   const handleVerify = async () => {
     setLoading(true);
 
-    if (!token) {
+    if (!emailToken) {
       setErrMsg("Token is required.");
       return;
     }
@@ -64,10 +64,10 @@ const VerifyEmailPage = () => {
     try {
       const response = await axios.post(
         `${constants.BASE_URL}/email/verify`,
-        { token },
+        { token: emailToken },
         {
           headers: {
-            Authorization: `Bearer ${userInfo.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -111,8 +111,8 @@ const VerifyEmailPage = () => {
 
         <input
           type="text"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
+          value={emailToken}
+          onChange={(e) => setEmailToken(e.target.value)}
           className="w-full mb-4 px-4 py-2 border rounded"
           placeholder="Enter your token"
         />

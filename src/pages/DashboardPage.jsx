@@ -9,6 +9,13 @@ function DashboardPage() {
   const navigate = useNavigate();
   const { userInfo, userType, emailVerified } = useSelector((state) => state.auth);
 
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    }).format(date);
+  };
   return (
     <div className="min-h-screen bg-blue-100 p-6">
       <Row justify="start">
@@ -16,7 +23,7 @@ function DashboardPage() {
           <Card
             title="User Information"
             bordered={false}
-            style={{ width: '100%', height: '90vh' }}
+            style={{ width: '100%', height: '90vh', overflowY: 'auto' }} // Make the card scrollable
           >
             <div className="space-y-6">
               <Title level={5}>Name:</Title>
@@ -39,7 +46,7 @@ function DashboardPage() {
               <Text>{userInfo.phone || <Text type="secondary">No phone number provided</Text>}</Text>
 
               <Title level={5}>Birthday:</Title>
-              <Text>{userInfo.birthday || <Text type="secondary">No birthday provided</Text>}</Text>
+              <Text>{userInfo.birthday ? formatDate(userInfo.birthday) : <Text type="secondary">No birthday provided</Text>}</Text>
 
               <Title level={5}>Gender:</Title>
               <Text>{userInfo.gender_name || <Text type="secondary">No gender information provided</Text>}</Text>

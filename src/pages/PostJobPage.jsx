@@ -12,7 +12,7 @@ function PostJobPage() {
   const [imageLink, setImageLink] = useState(null);
   const [fileList, setFileList] = useState([]); // Manage file list for the upload
   const [form] = Form.useForm();
-  const { userInfo, userType } = useSelector((state) => state.auth);
+  const { userInfo, userType, token } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Fetch skills for dropdown
@@ -22,7 +22,7 @@ function PostJobPage() {
           `${constants.BASE_URL}/skills/dropdown`,
           {
             headers: {
-              Authorization: `Bearer ${userInfo.token}`,
+              Authorization: `Bearer ${token}`,
             }
           },
         );
@@ -44,7 +44,7 @@ function PostJobPage() {
       const response = await axios.post(`${constants.BASE_URL}/upload/file`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${userInfo.token}`,
+          Authorization: `Bearer ${token}`,
         }
       });
       setImageLink(response.data.link);
@@ -87,7 +87,7 @@ function PostJobPage() {
     try {
       const response = await axios.post(`${constants.BASE_URL}/employer/jobs/post`, jobData, {
         headers: {
-          Authorization: `Bearer ${userInfo.token}`,
+          Authorization: `Bearer ${token}`,
         }
       });
       message.success("Job posted successfully");
