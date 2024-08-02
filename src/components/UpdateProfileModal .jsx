@@ -7,10 +7,14 @@ import { setCredentials } from "../slices/authSlice";
 import axios from "axios";
 import { constants } from "../context/API/constants";
 import { ClipLoader } from "react-spinners";
+import { FilePdfOutlined } from "@ant-design/icons";
+import { Tooltip, Button } from "antd";
 
 function UpdateProfileModal({ visible, onClose }) {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
+  const [resumeLink, setResumeLink] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const dispatch = useDispatch();
   const { userInfo, userType, token } = useSelector((state) => state.auth);
@@ -34,10 +38,45 @@ function UpdateProfileModal({ visible, onClose }) {
       setValue("headline", userInfo.headline || "");
       setValue("desc", userInfo.desc || "");
       setValue("birthday", userInfo.birthday || "");
+      if (userInfo.resume) {
+        setResumeLink(userInfo.resume);
+      }
     }
   }, [userInfo, userType, setValue]);
 
+  const onFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf" && file.size <= 500 * 1024 * 1024) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", "resumes");
+
+      setUploading(true);
+      try {
+        const response = await axios.post(`${constants.BASE_URL}/upload/file`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        setResumeLink(response.data.link);
+        setUploading(false);
+      } catch (error) {
+        setUploading(false);
+        setErrMsg("Failed to upload resume. Please try again.");
+      }
+    } else {
+      setErrMsg("Invalid file type or size. Please upload a PDF file up to 500MB.");
+    }
+  };
+
+  const handleDeleteResume = () => {
+    setResumeLink(null);
+  };
+
   const onSubmit = async (data) => {
+    data.resume = resumeLink ? resumeLink : null;
+    
     setLoading(true);
 
     try {
@@ -61,7 +100,7 @@ function UpdateProfileModal({ visible, onClose }) {
       );
 
       setLoading(false);
-      setErrMsg("")
+      setErrMsg("");
       onClose(); // Close the modal after a successful update
     } catch (error) {
       setLoading(false);
@@ -83,7 +122,7 @@ function UpdateProfileModal({ visible, onClose }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto relative">
         <button
           onClick={onClose}
           className="absolute top-0 right-0 mt-2 mr-2 text-gray-600 hover:text-gray-900"
@@ -189,6 +228,29 @@ function UpdateProfileModal({ visible, onClose }) {
             error={errors.birthday ? errors.birthday.message : ""}
           />
 
+          <div className="flex flex-col gap-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Upload Resume (PDF only, max 500MB)
+            </label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={onFileChange}
+              className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+            />
+            {uploading && <ClipLoader color="#4A90E2" size={20} />}
+            {resumeLink && (
+              <div className="flex items-center gap-2">
+                <Tooltip title="Resume uploaded successfully">
+                  <FilePdfOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
+                </Tooltip>
+                <Button type="link" danger onClick={handleDeleteResume}>
+                  Delete Resume
+                </Button>
+              </div>
+            )}
+          </div>
+
           {errMsg && (
             <span role="alert" className="text-sm text-red-500 mt-0.5">
               {errMsg}
@@ -207,6 +269,12 @@ function UpdateProfileModal({ visible, onClose }) {
             />
           )}
         </form>
+        {/* Fixed Close Button at the Bottom of the Modal */}
+        <div className="flex justify-end mt-4">
+          <Button onClick={onClose} className="bg-red-500 text-white hover:bg-red-700">
+            Close
+          </Button>
+        </div>
       </div>
     </div>
   );
