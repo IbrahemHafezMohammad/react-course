@@ -12,7 +12,6 @@ import { constants } from "../context/API/constants";
 import { ClipLoader } from "react-spinners";
 
 function SeekerRegisterForm() {
-
   const [showPassword, setShowPassword] = useState(false);
   const [errMsg, setErrMsg] = useState("");
 
@@ -52,7 +51,14 @@ function SeekerRegisterForm() {
         `${constants.BASE_URL}/seeker/register`,
         data
       );
-      dispatch(setCredentials({ userInfo: response.data, userType: "seeker", emailVerified: 'no', token: response.data?.token }));
+      dispatch(
+        setCredentials({
+          userInfo: response.data,
+          userType: "seeker",
+          emailVerified: "no",
+          token: response.data?.token,
+        })
+      );
       navigate("/verify-email");
     } catch (error) {
       setLoading(false);
@@ -221,7 +227,6 @@ function SeekerRegisterForm() {
             title="Create Account"
           />
         )}
-
       </form>
     </>
   );
