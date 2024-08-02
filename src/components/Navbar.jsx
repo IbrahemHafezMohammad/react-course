@@ -52,15 +52,17 @@ const Navbar = () => {
             <NavLink to="/" className={linkClass}>
               Home
             </NavLink>
-            <NavLink to="/jobs" className={linkClass}>
-              Jobs
-            </NavLink>
             <NavLink to="/about" className={linkClass}>
               About Us
             </NavLink>
             {userInfo && userType === 'employer' && emailVerified === 'yes' && (
               <NavLink to="/post-job" className={linkClass}>
                 Add Job
+              </NavLink>
+            )}
+             {userInfo && userType === 'seeker' && emailVerified === 'yes' && (
+              <NavLink to="/list-jobs" className={linkClass} onClick={toggleMobileMenu}>
+                Jobs
               </NavLink>
             )}
             <div className="flex items-center">
@@ -118,6 +120,11 @@ const Navbar = () => {
             {userInfo && userType === 'employer' && emailVerified === 'yes' && (
               <NavLink to="/post-job" className={linkClass} onClick={toggleMobileMenu}>
                 Add Job
+              </NavLink>
+            )}
+            {userInfo && userType === 'seeker' && emailVerified === 'yes' && (
+              <NavLink to="/list-jobs" className={linkClass} onClick={toggleMobileMenu}>
+                Jobs
               </NavLink>
             )}
             {userInfo ? (

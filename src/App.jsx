@@ -18,6 +18,7 @@ import VerifyEmailPage from "./pages/VerifyEmailPage";
 import DashboardPage from "./pages/DashboardPage";
 import AboutPage from "./pages/AboutPage";
 import PostJobPage from "./pages/PostJobPage";
+import ListJobsPage from "./pages/ListJobsPage";
 // import LoginPage from "./pages/LoginPage";
 import JobPage, { jobLoader } from "./pages/JobPage";
 
@@ -38,11 +39,9 @@ const App = () => {
         <Route path="" element={<PrivateEmployerRoute />}>
           <Route path="/post-job" element={<PostJobPage />} />
         </Route>
-        {/* <Route path="/login" element={<LoginPage />} /> */}
-        {/* <Route path="/jobs" element={<JobsPage />} /> */}
-        {/* <Route path="/add-job" element={<AddJobPage addJobSubmit={addJob} />} /> */}
-        {/* <Route path="/jobs/:id" element={<JobPage deleteJob={deleteJob} />} loader={jobLoader} /> */}
-        {/* <Route path="/edit-job/:id" element={<EditJobPage updateJobSubmit={updateJob} />} loader={jobLoader} /> */}
+        <Route path="" element={<PrivateSeekerRoute />}>
+          <Route path="/list-jobs" element={<ListJobsPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     )

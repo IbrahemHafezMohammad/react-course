@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Card, Row, Col, Typography, Button, Tag } from "antd";
+import { Card, Row, Col, Typography, Button, Tag, Tooltip } from "antd";
+import { FilePdfOutlined } from "@ant-design/icons";
 import UpdateProfileModal from "../components/UpdateProfileModal ";
 
 const { Title, Text } = Typography;
@@ -30,6 +31,12 @@ function DashboardPage() {
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
+  };
+
+  const handlePdfClick = () => {
+    if (userInfo.resume) {
+      window.open(userInfo.resume, "_blank");
+    }
   };
 
   return (
@@ -113,6 +120,18 @@ function DashboardPage() {
                       <Text type="secondary">No description provided</Text>
                     )}
                   </Text>
+                </>
+              )}
+
+              {userType === "seeker" && userInfo.resume && (
+                <>
+                  <Title level={5}>Resume:</Title>
+                  <Tooltip title="Click to view resume">
+                    <FilePdfOutlined
+                      style={{ fontSize: "24px", color: "#1890ff", cursor: "pointer" }}
+                      onClick={handlePdfClick}
+                    />
+                  </Tooltip>
                 </>
               )}
 
