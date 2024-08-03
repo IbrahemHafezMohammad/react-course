@@ -1,35 +1,91 @@
 import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Button, Typography, Tooltip, Modal } from "antd";
+import {
+  Card,
+  Row,
+  Col,
+  Button,
+  Typography,
+  Tooltip,
+  Modal,
+  Badge,
+  Pagination,
+  Select,
+  DatePicker,
+  Input,
+  Spin
+} from "antd";
 import { EyeOutlined } from "@ant-design/icons";
+import { ClipLoader } from "react-spinners";
 import axios from "axios";
 import { constants } from "../context/API/constants";
+import { DefaultImage } from "../assets"; // Add a default image asset
+import moment from "moment";
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 function SeekerApplications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    title: "",
+    status: "",
+    createdAt: null,
+  });
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const response = await axios.get(`${constants.BASE_URL}/seeker/jobs/applications`, {
+    fetchApplications();
+  }, [pagination.current]);
+
+  const fetchApplications = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: pagination.current,
+        ...(filters.title && { title: filters.title }),
+        ...(filters.status && { status: filters.status }),
+        ...(filters.createdAt && {
+          created_at: filters.createdAt.format("YYYY-MM-DD HH:mm:ss"),
+        }),
+      };
+
+      const response = await axios.get(
+        `${constants.BASE_URL}/seeker/jobs/applications`,
+        {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        });
-        setApplications(response.data.applications.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch applications:", error);
-        setLoading(false);
-      }
-    };
+          params,
+        }
+      );
+      setApplications(response.data.applications.data);
+      setPagination({
+        current: response.data.applications.current_page,
+        pageSize: response.data.applications.per_page,
+        total: response.data.applications.total,
+      });
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
+      setLoading(false);
+    }
+  };
 
+  const handleFilterChange = (field, value) => {
+    setFilters({ ...filters, [field]: value });
+  };
+
+  const applyFilters = () => {
+    setPagination({ ...pagination, current: 1 });
     fetchApplications();
-  }, []);
+  };
 
   const showModal = (application) => {
     setSelectedApplication(application);
@@ -41,38 +97,104 @@ function SeekerApplications() {
     setSelectedApplication(null);
   };
 
+  const renderStatusBadge = (status) => {
+    const statusColors = {
+      PENDING: "default",
+      ACCEPTED: "green",
+      REJECTED: "red",
+    };
+    return <Badge color={statusColors[status]} text={status} />;
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+      </div>
+    );
   }
 
   return (
-    <>
-      <Row gutter={[16, 16]}>
+    <div className="bg-white p-4 rounded-lg shadow-lg">
+      <Row gutter={[16, 16]} className="mb-4">
+        <Col xs={24} md={8}>
+          <Input
+            placeholder="Search by Title"
+            value={filters.title}
+            onChange={(e) => handleFilterChange("title", e.target.value)}
+          />
+        </Col>
+        <Col xs={24} md={8}>
+          <Select
+            placeholder="Filter by Status"
+            value={filters.status}
+            onChange={(value) => handleFilterChange("status", value)}
+            style={{ width: "100%" }}
+          >
+            <Option value="">All</Option>
+            <Option value="1">Pending</Option>
+            <Option value="2">Accepted</Option>
+            <Option value="3">Rejected</Option>
+          </Select>
+        </Col>
+        <Col xs={24} md={8}>
+          <DatePicker
+            showTime
+            placeholder="Applied at"
+            value={filters.createdAt}
+            onChange={(value) => handleFilterChange("createdAt", value)}
+            style={{ width: "100%" }}
+          />
+        </Col>
+        <Col xs={24} style={{ textAlign: "right" }}>
+          <Button type="primary" onClick={applyFilters}>
+            Apply Filters
+          </Button>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} className="mt-4">
         {applications.map((application) => (
-          <Col key={application.id} xs={24} md={12} lg={8}>
+          <Col xs={24} md={12} lg={8} key={application.id}>
             <Card
               hoverable
               cover={
-                application.job_post.image && (
-                  <img alt={application.job_post.title} src={application.job_post.image} />
-                )
+                <img
+                  alt={application.job_post.title}
+                  src={application.job_post.image || DefaultImage}
+                  style={{ height: "100px", objectFit: "cover" }}
+                />
               }
+              actions={[
+                <Button
+                  icon={<EyeOutlined />}
+                  onClick={() => showModal(application)}
+                >
+                  View Details
+                </Button>,
+              ]}
             >
-              <Title level={5}>{application.job_post.title}</Title>
-              <Text>{application.job_post.desc.slice(0, 30)}...</Text>
-              <Text>Status: {application.status_name}</Text>
-              <Button
-                type="primary"
-                icon={<EyeOutlined />}
-                onClick={() => showModal(application)}
-                style={{ marginTop: "10px" }}
-              >
-                View
-              </Button>
+              <Card.Meta
+                title={application.job_post.title}
+                description={
+                  application.job_post.desc.length > 20
+                    ? `${application.job_post.desc.substring(0, 20)}...`
+                    : application.job_post.desc
+                }
+              />
+              {renderStatusBadge(application.status_name)}
             </Card>
           </Col>
         ))}
       </Row>
+
+      <Pagination
+        current={pagination.current}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        onChange={(page) => setPagination({ ...pagination, current: page })}
+        style={{ marginTop: "16px", textAlign: "right" }}
+      />
 
       {selectedApplication && (
         <Modal
@@ -85,7 +207,14 @@ function SeekerApplications() {
             </Button>,
           ]}
         >
-          <Title level={5}>Description</Title>
+          <img
+            alt={selectedApplication.job_post.title}
+            src={selectedApplication.job_post.image || DefaultImage}
+            style={{ width: "100%", height: "200px", objectFit: "cover" }}
+          />
+          <Title level={5} style={{ marginTop: "16px" }}>
+            Description
+          </Title>
           <Text>{selectedApplication.job_post.desc}</Text>
 
           <Title level={5} style={{ marginTop: "16px" }}>
@@ -96,32 +225,47 @@ function SeekerApplications() {
           <Title level={5} style={{ marginTop: "16px" }}>
             Application Date
           </Title>
-          <Text>{new Date(selectedApplication.created_at).toLocaleString()}</Text>
+          <Text>{moment(selectedApplication.created_at).format("LLL")}</Text>
 
           <Title level={5} style={{ marginTop: "16px" }}>
             Job Posted Date
           </Title>
-          <Text>{new Date(selectedApplication.job_post.created_at).toLocaleString()}</Text>
+          <Text>
+            {moment(selectedApplication.job_post.created_at).format("LLL")}
+          </Text>
 
           <Title level={5} style={{ marginTop: "16px" }}>
             Application Status
           </Title>
-          <Text>{selectedApplication.status_name}</Text>
+          {renderStatusBadge(selectedApplication.status_name)}
 
           <Title level={5} style={{ marginTop: "16px" }}>
             Application Message
           </Title>
-          <Text>{selectedApplication.message}</Text>
+          <Text>
+            {selectedApplication.message || (
+              <Text type="secondary">No application message provided</Text>
+            )}
+          </Text>
 
           <Title level={5} style={{ marginTop: "16px" }}>
             Application Resume
           </Title>
-          <a href={selectedApplication.resume} target="_blank" rel="noopener noreferrer">
+          <a
+            href={selectedApplication.resume}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             View Resume
           </a>
+
+          <Title level={5} style={{ marginTop: "16px" }}>
+            Total Applications for this Job
+          </Title>
+          <Text>{selectedApplication.job_post.application_count}</Text>
         </Modal>
       )}
-    </>
+    </div>
   );
 }
 
