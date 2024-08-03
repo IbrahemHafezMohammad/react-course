@@ -3,7 +3,8 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Card, Row, Col, Typography, Button, Tag, Tooltip } from "antd";
 import { FilePdfOutlined } from "@ant-design/icons";
-import UpdateProfileModal from "../components/UpdateProfileModal ";
+import UpdateProfileModal from "../components/UpdateProfileModal";
+import SeekerApplications from "../components/SeekerApplications";
 
 const { Title, Text } = Typography;
 
@@ -14,7 +15,6 @@ function DashboardPage() {
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Function to format the date
   const formatDate = (dateString) => {
     if (!dateString) return null;
     const date = new Date(dateString);
@@ -41,12 +41,12 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-blue-100 p-6">
-      <Row justify="start">
+      <Row justify="start" gutter={[16, 16]}>
         <Col xs={24} md={12} lg={8}>
           <Card
             title="User Information"
             bordered={false}
-            style={{ width: "100%", height: "90vh", overflowY: "auto" }} // Make the card scrollable
+            style={{ width: "100%", height: "90vh", overflowY: "auto" }}
           >
             <div className="space-y-6">
               <Title level={5}>Name:</Title>
@@ -128,7 +128,11 @@ function DashboardPage() {
                   <Title level={5}>Resume:</Title>
                   <Tooltip title="Click to view resume">
                     <FilePdfOutlined
-                      style={{ fontSize: "24px", color: "#1890ff", cursor: "pointer" }}
+                      style={{
+                        fontSize: "24px",
+                        color: "#1890ff",
+                        cursor: "pointer",
+                      }}
                       onClick={handlePdfClick}
                     />
                   </Tooltip>
@@ -143,9 +147,14 @@ function DashboardPage() {
             </div>
           </Card>
         </Col>
+
+        {userType === "seeker" && (
+          <Col xs={24} md={12} lg={16}>
+            <SeekerApplications />
+          </Col>
+        )}
       </Row>
 
-      {/* Update Profile Modal */}
       <UpdateProfileModal visible={isModalVisible} onClose={handleCloseModal} />
     </div>
   );
