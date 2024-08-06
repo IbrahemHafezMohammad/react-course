@@ -12,10 +12,9 @@ import {
   Select,
   DatePicker,
   Input,
-  Spin
+  Spin,
 } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
-import { ClipLoader } from "react-spinners";
 import axios from "axios";
 import { constants } from "../context/API/constants";
 import { DefaultImage } from "../assets"; // Add a default image asset
@@ -99,7 +98,7 @@ function SeekerApplications() {
 
   const renderStatusBadge = (status) => {
     const statusColors = {
-      PENDING: "default",
+      PENDING: "gray",
       ACCEPTED: "green",
       REJECTED: "red",
     };
@@ -115,44 +114,59 @@ function SeekerApplications() {
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-lg">
-      <Row gutter={[16, 16]} className="mb-4">
-        <Col xs={24} md={8}>
-          <Input
-            placeholder="Search by Title"
-            value={filters.title}
-            onChange={(e) => handleFilterChange("title", e.target.value)}
-          />
-        </Col>
-        <Col xs={24} md={8}>
-          <Select
-            placeholder="Filter by Status"
-            value={filters.status}
-            onChange={(value) => handleFilterChange("status", value)}
-            style={{ width: "100%" }}
-          >
-            <Option value="">All</Option>
-            <Option value="1">Pending</Option>
-            <Option value="2">Accepted</Option>
-            <Option value="3">Rejected</Option>
-          </Select>
-        </Col>
-        <Col xs={24} md={8}>
-          <DatePicker
-            showTime
-            placeholder="Applied at"
-            value={filters.createdAt}
-            onChange={(value) => handleFilterChange("createdAt", value)}
-            style={{ width: "100%" }}
-          />
-        </Col>
-        <Col xs={24} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={applyFilters}>
-            Apply Filters
-          </Button>
-        </Col>
-      </Row>
-
+    <div
+      className="bg-white p-4 rounded-lg shadow-lg"
+      style={{
+        height: "calc(100vh - 60px)",
+        overflowY: "auto",
+      }}
+    >
+      <Title level={3} style={{ marginBottom: "16px" }}>
+        My Applications
+      </Title>
+      {applications.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <Title level={4}>No applications available</Title>
+        </div>
+      ) : (
+        <Row gutter={[16, 16]} className="mb-4">
+          <Col xs={24} md={8}>
+            <Input
+              placeholder="Search by Title"
+              value={filters.title}
+              onChange={(e) => handleFilterChange("title", e.target.value)}
+            />
+          </Col>
+          <Col xs={24} md={8}>
+            <Select
+              placeholder="Filter by Status"
+              value={filters.status}
+              onChange={(value) => handleFilterChange("status", value)}
+              style={{ width: "100%" }}
+            >
+              <Option value="">All</Option>
+              <Option value="1">Pending</Option>
+              <Option value="2">Accepted</Option>
+              <Option value="3">Rejected</Option>
+            </Select>
+          </Col>
+          <Col xs={24} md={8}>
+            <DatePicker
+              showTime
+              placeholder="Applied at"
+              value={filters.createdAt}
+              onChange={(value) => handleFilterChange("createdAt", value)}
+              style={{ width: "100%" }}
+            />
+          </Col>
+          <Col xs={24} style={{ textAlign: "right" }}>
+            <Button type="primary" onClick={applyFilters}>
+              Apply Filters
+            </Button>
+          </Col>
+        </Row>
+      )}
+      
       <Row gutter={[16, 16]} className="mt-4">
         {applications.map((application) => (
           <Col xs={24} md={12} lg={8} key={application.id}>
@@ -162,7 +176,7 @@ function SeekerApplications() {
                 <img
                   alt={application.job_post.title}
                   src={application.job_post.image || DefaultImage}
-                  style={{ height: "100px", objectFit: "cover" }}
+                  style={{ height: "80px", objectFit: "cover" }}
                 />
               }
               actions={[
@@ -173,6 +187,10 @@ function SeekerApplications() {
                   View Details
                 </Button>,
               ]}
+              style={{
+                height: "250px",
+                paddingBottom: "16px", // Add padding to the bottom
+              }}
             >
               <Card.Meta
                 title={application.job_post.title}
@@ -193,13 +211,13 @@ function SeekerApplications() {
         pageSize={pagination.pageSize}
         total={pagination.total}
         onChange={(page) => setPagination({ ...pagination, current: page })}
-        style={{ marginTop: "16px", textAlign: "right" }}
+        style={{ marginTop: "36px", textAlign: "right" }}
       />
 
       {selectedApplication && (
         <Modal
           title={selectedApplication.job_post.title}
-          visible={isModalVisible}
+          open={isModalVisible}
           onCancel={handleModalClose}
           footer={[
             <Button key="close" onClick={handleModalClose}>
