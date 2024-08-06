@@ -32,9 +32,9 @@ const Navbar = () => {
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center justify-between w-full md:w-auto">
             <NavLink className="flex flex-shrink-0 items-center" to="/">
-              <img className="h-10 w-auto" src={Logo} alt="React Jobs" />
+              <img className="h-10 w-auto" src={Logo} alt="Job Finder" />
               <span className="hidden md:block text-white text-2xl font-bold ml-2">
-                React Jobs
+                Job Finder
               </span>
             </NavLink>
             <div className="md:hidden">
