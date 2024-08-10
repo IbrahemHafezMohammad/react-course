@@ -45,7 +45,7 @@ function DashboardPage() {
       <Row justify="start" gutter={[16, 16]}>
         <Col xs={24} md={12} lg={8}>
           <Card
-            title="User Information"
+            title= {userType == "seeker" ? "Seeker Information" : "Employer Information"}
             bordered={false}
             style={{ width: "100%", height: "90vh", overflowY: "auto" }}
           >

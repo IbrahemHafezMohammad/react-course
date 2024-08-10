@@ -71,7 +71,7 @@ const VerifyEmailPage = () => {
           },
         }
       );
-      dispatch(changeVerifyEmailStatus({ emailVerified: 'yes' }));
+      dispatch(changeVerifyEmailStatus({ emailVerified: "yes" }));
       toast.success("Verify Successful!");
       navigate("/");
     } catch (error) {
@@ -87,11 +87,14 @@ const VerifyEmailPage = () => {
         if (statusCode === 400) {
           switch (message) {
             case "EMAIL_ALREADY_VERIFIED":
-              dispatch(changeVerifyEmailStatus({ emailVerified: 'yes' }));
+              dispatch(changeVerifyEmailStatus({ emailVerified: "yes" }));
               toast.error("Email Already Verified.");
               break;
             case "INVALID_VERIFICATION_TOKEN":
               toast.error("Invalid Verification Token.");
+              break;
+            case "VERIFICATION_TOKEN_EXPIRED":
+              toast.error("Verification Token Expired.");
               break;
           }
         } else {

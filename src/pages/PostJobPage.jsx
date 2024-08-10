@@ -3,6 +3,7 @@ import { Form, Input, Button, Select, Upload, message } from 'antd';
 import { useSelector } from "react-redux";
 import axios from 'axios';
 import { constants } from '../context/API/constants';
+import { useNavigate } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -13,6 +14,7 @@ function PostJobPage() {
   const [fileList, setFileList] = useState([]); // Manage file list for the upload
   const [form] = Form.useForm();
   const { userInfo, userType, token } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch skills for dropdown
@@ -91,6 +93,7 @@ function PostJobPage() {
         }
       });
       message.success("Job posted successfully");
+      navigate("/dashboard");
     } catch (error) {
       message.error("Failed to post job");
     }

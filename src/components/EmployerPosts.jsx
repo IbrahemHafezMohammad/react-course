@@ -12,6 +12,11 @@ import {
   Spin,
   Tag,
   Form,
+  Modal,
+  Table,
+  Switch,
+  message,
+  Tooltip,
 } from "antd";
 import axios from "axios";
 import { EyeOutlined } from "@ant-design/icons";
@@ -19,7 +24,6 @@ import { constants } from "../context/API/constants";
 import { DefaultImage } from "../assets"; // Import the default image asset
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
 function EmployerPosts() {
   const [posts, setPosts] = useState([]);
@@ -34,6 +38,20 @@ function EmployerPosts() {
     current: 1,
     pageSize: 10,
     total: 0,
+  });
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationsPagination, setApplicationsPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  const [responding, setResponding] = useState(null);
+  const [messageModal, setMessageModal] = useState({
+    visible: false,
+    message: "",
   });
 
   useEffect(() => {
@@ -93,6 +111,35 @@ function EmployerPosts() {
     }
   };
 
+  const fetchApplications = async (postId, page = 1) => {
+    setApplicationsLoading(true);
+    try {
+      const response = await axios.get(
+        `${constants.BASE_URL}/employer/jobs/list/applications/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          params: {
+            page,
+          },
+        }
+      );
+
+      const data = response.data.applications;
+      setApplications(data.data);
+      setApplicationsPagination({
+        current: data.current_page,
+        pageSize: data.per_page,
+        total: data.total,
+      });
+      setApplicationsLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
+      setApplicationsLoading(false);
+    }
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters({ ...filters, [field]: value });
   };
@@ -102,6 +149,80 @@ function EmployerPosts() {
     fetchPosts();
   };
 
+  const handleViewDetails = (post) => {
+    setSelectedPost(post);
+    fetchApplications(post.id);
+    setIsModalVisible(true);
+  };
+
+  const handleToggleJobStatus = async (postId) => {
+    try {
+      await axios.post(
+        `${constants.BASE_URL}/employer/jobs/post/toggle/${postId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      message.success("Job status updated successfully");
+      setSelectedPost((prevPost) => ({
+        ...prevPost,
+        status_name: prevPost.status_name === "OPENED" ? "CLOSED" : "OPENED",
+      }));
+      fetchPosts(); // Refresh posts to reflect the new status
+    } catch (error) {
+      console.error("Failed to toggle job status:", error);
+      message.error("Failed to update job status");
+    }
+  };
+
+  const handleRespond = async (applicationId, isAccepted) => {
+    setResponding(applicationId);
+    try {
+      await axios.post(
+        `${constants.BASE_URL}/employer/jobs/application/respond`,
+        {
+          job_application_id: applicationId,
+          is_accepted: isAccepted,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      message.success(
+        `Application ${isAccepted ? "accepted" : "rejected"} successfully`
+      );
+
+      setApplications((prevApplications) =>
+        prevApplications.map((application) =>
+          application.id === applicationId
+            ? {
+                ...application,
+                status_name: isAccepted ? "ACCEPTED" : "REJECTED",
+              }
+            : application
+        )
+      );
+    } catch (error) {
+      console.error("Failed to respond to application:", error);
+      message.error("Failed to respond to application");
+    } finally {
+      setResponding(null);
+    }
+  };
+
+  const handleShowMessageModal = (message) => {
+    setMessageModal({
+      visible: true,
+      message,
+    });
+  };
+
   const renderSkillsTags = (skills) => {
     return skills.map((skill) => (
       <Tag key={skill.id} color="blue">
@@ -109,6 +230,82 @@ function EmployerPosts() {
       </Tag>
     ));
   };
+
+  const columns = [
+    {
+      title: "Seeker Name",
+      dataIndex: ["seeker", "user", "name"],
+      key: "name",
+    },
+    {
+      title: "User Name",
+      dataIndex: ["seeker", "user", "user_name"],
+      key: "user_name",
+    },
+    {
+      title: "Email",
+      dataIndex: ["seeker", "user", "email"],
+      key: "email",
+    },
+    {
+      title: "Phone",
+      dataIndex: ["seeker", "user", "phone"],
+      key: "phone",
+    },
+    {
+      title: "Message",
+      dataIndex: "message",
+      key: "message",
+      render: (message) => (
+        <Tooltip title="Click to view full message">
+          <span onClick={() => handleShowMessageModal(message)}>
+            {message ? message.substring(0, 20) + "..." : "No message provided"}
+          </span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Resume",
+      dataIndex: "resume",
+      key: "resume",
+      render: (resume) => (
+        <a href={resume} target="_blank" rel="noopener noreferrer">
+          View Resume
+        </a>
+      ),
+    },
+    {
+      title: "Respond",
+      key: "respond",
+      render: (_, application) => {
+        if (application.status_name === "PENDING") {
+          return responding === application.id ? (
+            <Spin />
+          ) : (
+            <>
+              <Button
+                type="primary"
+                style={{ marginBottom: "8px" }}
+                block
+                onClick={() => handleRespond(application.id, true)}
+              >
+                ACCEPT
+              </Button>
+              <Button
+                type="primary"
+                danger
+                block
+                onClick={() => handleRespond(application.id, false)}
+              >
+                REJECT
+              </Button>
+            </>
+          );
+        }
+        return application.status_name;
+      },
+    },
+  ];
 
   if (loading) {
     return (
@@ -191,9 +388,7 @@ function EmployerPosts() {
                 actions={[
                   <Button
                     icon={<EyeOutlined />}
-                    onClick={() => {
-                      /* Handle view details later */
-                    }}
+                    onClick={() => handleViewDetails(post)}
                   >
                     View Details
                   </Button>,
@@ -228,6 +423,73 @@ function EmployerPosts() {
         onChange={(page) => setPagination({ ...pagination, current: page })}
         style={{ marginTop: "36px", textAlign: "right" }}
       />
+
+      {selectedPost && (
+        <Modal
+          title={selectedPost.title}
+          open={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setIsModalVisible(false)}>
+              Close
+            </Button>,
+          ]}
+          width={1000} // Make the modal wider
+        >
+          <img
+            alt={selectedPost.title}
+            src={selectedPost.image || DefaultImage}
+            style={{ width: "100%", height: "200px", objectFit: "cover" }}
+          />
+
+          <div style={{ marginTop: "16px" }}>
+            <Text strong>Description: </Text>
+            <Text>{selectedPost.desc}</Text>
+          </div>
+
+          <div style={{ marginTop: "16px" }}>
+            <Text strong>Skills: </Text>
+            {renderSkillsTags(selectedPost.skills)}
+          </div>
+
+          <div style={{ marginTop: "16px" }}>
+            <Text strong>Status: </Text>
+            <Switch
+              checked={selectedPost.status_name === "OPENED"}
+              onChange={() => handleToggleJobStatus(selectedPost.id)}
+              checkedChildren="OPENED"
+              unCheckedChildren="CLOSED"
+              style={{ marginLeft: "8px" }}
+            />
+          </div>
+
+          <Table
+            columns={columns}
+            dataSource={applications}
+            rowKey="id"
+            loading={applicationsLoading}
+            style={{ marginTop: "24px" }}
+            pagination={{
+              current: applicationsPagination.current,
+              pageSize: applicationsPagination.pageSize,
+              total: applicationsPagination.total,
+              onChange: (page) => fetchApplications(selectedPost.id, page),
+            }}
+          />
+        </Modal>
+      )}
+
+      <Modal
+        title="Full Message"
+        open={messageModal.visible}
+        onCancel={() => setMessageModal({ visible: false, message: "" })}
+        footer={null}
+        style={{ maxWidth: "80%" }}
+      >
+        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+          <Text>{messageModal.message}</Text>
+        </div>
+      </Modal>
     </div>
   );
 }
