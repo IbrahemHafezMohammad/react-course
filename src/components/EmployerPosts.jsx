@@ -5,25 +5,25 @@ import {
   Col,
   Button,
   Typography,
-  Modal,
   Pagination,
   Select,
   DatePicker,
   Input,
   Spin,
   Tag,
+  Form,
 } from "antd";
 import axios from "axios";
 import { EyeOutlined } from "@ant-design/icons";
 import { constants } from "../context/API/constants";
 import { DefaultImage } from "../assets"; // Import the default image asset
-import moment from "moment";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 function EmployerPosts() {
   const [posts, setPosts] = useState([]);
+  const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     title: "",
@@ -38,7 +38,24 @@ function EmployerPosts() {
 
   useEffect(() => {
     fetchPosts();
+    fetchSkills();
   }, [pagination.current]);
+
+  const fetchSkills = async () => {
+    try {
+      const response = await axios.get(
+        `${constants.BASE_URL}/skills/dropdown`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setSkills(response.data);
+    } catch (error) {
+      console.error("Failed to fetch skills:", error);
+    }
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -124,13 +141,19 @@ function EmployerPosts() {
         <Col xs={24} md={8}>
           <Select
             mode="multiple"
-            placeholder="Filter by Skills"
+            allowClear
+            placeholder={
+              skills.length > 0 ? "Select skills" : "No skills available"
+            }
+            options={skills.map((skill) => ({
+              value: skill.id,
+              label: skill.name,
+            }))}
+            disabled={skills.length === 0} // Disable dropdown if no skills available
             value={filters.skills}
             onChange={(value) => handleFilterChange("skills", value)}
             style={{ width: "100%" }}
-          >
-            {/* You can populate this with skills data if available */}
-          </Select>
+          />
         </Col>
         <Col xs={24} md={8}>
           <DatePicker
@@ -148,7 +171,11 @@ function EmployerPosts() {
         </Col>
       </Row>
 
-      {posts.length !== 0 ? (
+      {posts.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <Title level={4}>No job posts available</Title>
+        </div>
+      ) : (
         <Row gutter={[16, 16]} className="mt-4">
           {posts.map((post) => (
             <Col xs={24} md={12} lg={8} key={post.id}>
@@ -192,11 +219,8 @@ function EmployerPosts() {
             </Col>
           ))}
         </Row>
-      ) : (
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
-          <Title level={4}>No job posts available</Title>
-        </div>
       )}
+
       <Pagination
         current={pagination.current}
         pageSize={pagination.pageSize}
