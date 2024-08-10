@@ -5,6 +5,7 @@ import { Card, Row, Col, Typography, Button, Tag, Tooltip } from "antd";
 import { FilePdfOutlined } from "@ant-design/icons";
 import UpdateProfileModal from "../components/UpdateProfileModal";
 import SeekerApplications from "../components/SeekerApplications";
+import EmployerPosts from "../components/EmployerPosts";
 
 const { Title, Text } = Typography;
 
@@ -151,6 +152,12 @@ function DashboardPage() {
         {userType === "seeker" && (
           <Col xs={24} md={12} lg={16}>
             <SeekerApplications />
+          </Col>
+        )}
+
+        {userType === "employer" && (
+          <Col xs={24} md={12} lg={16}>
+            <EmployerPosts />
           </Col>
         )}
       </Row>

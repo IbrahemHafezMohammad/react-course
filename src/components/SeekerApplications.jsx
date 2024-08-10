@@ -101,6 +101,8 @@ function SeekerApplications() {
       PENDING: "gray",
       ACCEPTED: "green",
       REJECTED: "red",
+      CLOSED: "red",
+      OPENED: "green"
     };
     return <Badge color={statusColors[status]} text={status} />;
   };
@@ -124,11 +126,7 @@ function SeekerApplications() {
       <Title level={3} style={{ marginBottom: "16px" }}>
         My Applications
       </Title>
-      {applications.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
-          <Title level={4}>No applications available</Title>
-        </div>
-      ) : (
+     
         <Row gutter={[16, 16]} className="mb-4">
           <Col xs={24} md={8}>
             <Input
@@ -165,7 +163,6 @@ function SeekerApplications() {
             </Button>
           </Col>
         </Row>
-      )}
       
       <Row gutter={[16, 16]} className="mt-4">
         {applications.map((application) => (
@@ -213,8 +210,8 @@ function SeekerApplications() {
         onChange={(page) => setPagination({ ...pagination, current: page })}
         style={{ marginTop: "36px", textAlign: "right" }}
       />
-
-      {selectedApplication && (
+      
+      {selectedApplication ? (
         <Modal
           title={selectedApplication.job_post.title}
           open={isModalVisible}
@@ -258,6 +255,11 @@ function SeekerApplications() {
           {renderStatusBadge(selectedApplication.status_name)}
 
           <Title level={5} style={{ marginTop: "16px" }}>
+            Job Status
+          </Title>
+          {renderStatusBadge(selectedApplication.job_post.status_name)}
+
+          <Title level={5} style={{ marginTop: "16px" }}>
             Application Message
           </Title>
           <Text>
@@ -282,6 +284,10 @@ function SeekerApplications() {
           </Title>
           <Text>{selectedApplication.job_post.application_count}</Text>
         </Modal>
+      ) : (
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <Title level={4}>No applications available</Title>
+        </div>
       )}
     </div>
   );
